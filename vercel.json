@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/telegram/webhook",
+      "dest": "/api/server.js"
+    },
+    {
+      "src": "/api/health",
+      "dest": "/api/server.js"
+    },
+    {
+      "src": "/api/md/(.*)",
+      "dest": "/api/server.js"
+    },
+    {
+      "src": "/api/appointments/(.*)",
+      "dest": "/api/server.js"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/server.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "api/server.js": {
+      "maxDuration": 30
+    }
+  }
+}

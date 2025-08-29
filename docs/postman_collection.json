@@ -1,0 +1,206 @@
+{
+  "info": {
+    "name": "SerenityCareAI Telegram Bot API",
+    "description": "API collection for testing SerenityCareAI Telegram Bot endpoints",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:7860",
+      "description": "Base URL for local development. Change to your production URL for deployed testing."
+    },
+    {
+      "key": "production_url",
+      "value": "https://your-app.vercel.app",
+      "description": "Production URL - replace with your actual Vercel deployment URL"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health & Status",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "health"]
+            },
+            "description": "Check server health and service status. Should return 200 with service availability information."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Endpoints (MD-Only)",
+      "item": [
+        {
+          "name": "Daily Brief",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{api_key}}",
+                "description": "Optional API key for authentication",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/md/brief",
+              "host": ["{{base_url}}"],
+              "path": ["api", "md", "brief"]
+            },
+            "description": "Get daily statistics including chats, bookings, cancellations, and FAQs. Requires MD_TELEGRAM_USER_ID to be configured. May return 403 if unauthorized."
+          },
+          "response": []
+        },
+        {
+          "name": "Follow-ups",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{api_key}}",
+                "description": "Optional API key for authentication",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/md/followups",
+              "host": ["{{base_url}}"],
+              "path": ["api", "md", "followups"]
+            },
+            "description": "Get list of pending and rescheduled appointments (up to 20). Requires MD_TELEGRAM_USER_ID to be configured."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Appointments",
+      "item": [
+        {
+          "name": "Appointments Due Today",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{api_key}}",
+                "description": "Optional API key for authentication",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/appointments/due-today",
+              "host": ["{{base_url}}"],
+              "path": ["api", "appointments", "due-today"]
+            },
+            "description": "Get appointments scheduled for today. Returns empty array if no appointments or may return 403 if unauthorized."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Webhook Testing",
+      "item": [
+        {
+          "name": "Test Webhook Endpoint",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"update_id\\\": 123456789,\\n  \\\"message\\\": {\\n    \\\"message_id\\\": 1,\\n    \\\"from\\\": {\\n      \\\"id\\\": 123456789,\\n      \\\"is_bot\\\": false,\\n      \\\"first_name\\\": \\\"Test\\\",\\n      \\\"username\\\": \\\"testuser\\\"\\n    },\\n    \\\"chat\\\": {\\n      \\\"id\\\": 123456789,\\n      \\\"first_name\\\": \\\"Test\\\",\\n      \\\"username\\\": \\\"testuser\\\",\\n      \\\"type\\\": \\\"private\\\"\\n    },\\n    \\\"date\\\": 1609459200,\\n    \\\"text\\\": \\\"/start\\\"\\n  }\\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/telegram/webhook",
+              "host": ["{{base_url}}"],
+              "path": ["api", "telegram", "webhook"]
+            },
+            "description": "Test the Telegram webhook endpoint with a sample update. This simulates a Telegram message being sent to your bot. ⚠️ Only use this for testing - real webhook calls come from Telegram servers."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Testing",
+      "item": [
+        {
+          "name": "404 Not Found",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/nonexistent",
+              "host": ["{{base_url}}"],
+              "path": ["api", "nonexistent"]
+            },
+            "description": "Test 404 error handling. Should return JSON with available endpoints."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set base URL based on environment",
+          "if (pm.environment.get('environment') === 'production') {",
+          "    pm.collectionVariables.set('base_url', pm.collectionVariables.get('production_url'));",
+          "} else {",
+          "    pm.collectionVariables.set('base_url', 'http://localhost:7860');",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Basic response validation",
+          "pm.test('Response time is less than 5000ms', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "pm.test('Response has correct Content-Type', function () {",
+          "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+          "});",
+          "",
+          "// Status code validation",
+          "if (pm.response.code === 200) {",
+          "    pm.test('Success response has valid JSON', function () {",
+          "        pm.response.to.have.jsonBody();",
+          "    });",
+          "} else if (pm.response.code === 403) {",
+          "    pm.test('403 response indicates authorization required', function () {",
+          "        const jsonData = pm.response.json();",
+          "        pm.expect(jsonData).to.have.property('error');",
+          "        pm.expect(jsonData.error.toLowerCase()).to.include('unauthorized');",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ]
+}
